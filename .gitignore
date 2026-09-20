@@ -1,0 +1,40 @@
+# Dependencias y compilaciones
+node_modules/
+release/
+release-locked-old/
+dist/
+out/
+outputs/
+artifacts/
+
+# Datos locales de la app y secretos
+data/
+*.local.json
+secrets.json
+paper-state.json
+settings.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs y temporales
+*.log
+npm-debug.log*
+*.tmp
+*.temp
+
+# Python/Windows heredados
+__pycache__/
+*.pyc
+*.lnk
+*.bat
+!generar-release.bat
+*.vbs
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Trader</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="overrides.css">
+  <link rel="stylesheet" href="terminal.css">
+  <link rel="stylesheet" href="terminal-overrides.css">
+  <link rel="stylesheet" href="order-overrides.css">
+  <link rel="stylesheet" href="market-overrides.css">
+  <link rel="stylesheet" href="agent-overrides.css">
+  <link rel="stylesheet" href="news-overrides.css">
+  <link rel="stylesheet" href="professional.css">
+</head>
+<body>
+  <div class="titlebar"><span class="logo">◈</span><span>LLM Trader</span><span class="titlebar-note">terminal local</span></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V9m5 11V4m5 13V7m5 8V3M2 13h4m1-5h4m1 4h4m1-5h4"/></svg></div><div><strong>LLM Trader</strong><small>Trading workspace</small></div></div>
+      <div class="workspace-label">CUENTA</div>
+      <div class="workspace-tabs sidebar-workspaces" role="tablist" aria-label="Espacio de trabajo"><button id="paperWorkspace" class="workspace-tab selected" role="tab" aria-selected="true">Simulación <small>Paper trading</small></button><button id="liveWorkspace" class="workspace-tab" role="tab" aria-selected="false" title="Conexión de cuenta en solo lectura">Real <small>Solo lectura · órdenes bloqueadas</small></button></div>
+      <div class="workspace-label">HERRAMIENTAS</div>
+      <nav>
+        <button class="nav" data-page="analyze"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 5-5 4 3 8-10M15 5h5v5"/></svg><span>Analizar mercado</span></button>
+        <button class="nav" data-page="research"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4h16v16H4Zm0-10h16M10 10v10"/></svg><span>Investigación</span></button>
+        <button class="nav" data-page="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6m6 4v6"/></svg><span>Configuración</span></button>
+      </nav>
+      <div class="sidebar-note"><span class="sidebar-note-label">PAPER TRADING</span><p>Mercado real.<br>Capital virtual.</p><small>Ejecución local supervisada</small></div>
+      <div class="sidebar-foot"><span id="keyStatus" class="status-dot"></span><span id="keyStatusText">LLM sin configurar</span></div>
+    </aside>
+    <main class="content">
+      <header class="topbar"><div><p class="eyebrow" id="eyebrow">SIMULACIÓN</p><h1 id="pageTitle">Terminal</h1><p class="page-subtitle" id="pageSubtitle">Mercado real · capital virtual</p></div><div class="top-actions"><span class="environment-chip">PAPER</span><span class="feed-status"><span id="liveStatus">Esperando mercado</span></span><span class="top-date" id="clock"></span></div></header>
+      <div class="view-tabs" role="tablist" aria-label="Vista de simulación"><button class="view-tab active" data-page="dashboard" role="tab">Terminal</button><button class="view-tab" data-page="agents" role="tab">Agentes</button></div>
+      <section id="page"></section>
+    </main>
+  </div>
+  <div id="toastRoot"></div>
+  <script src="candles.js"></script>
+  <script src="terminal.js"></script>
+  <script src="stats.js"></script>
+  <script src="research.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

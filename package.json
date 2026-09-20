@@ -1,0 +1,37 @@
+{
+  "name": "llm-trader-desktop",
+  "version": "0.1.0",
+  "description": "Terminal de análisis y paper trading asistido por LLMs.",
+  "main": "src/main/main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "node scripts/start.cjs",
+    "dev": "node scripts/start.cjs",
+    "test": "node --test test/*.test.js",
+    "dist": "electron-builder --win nsis --publish never",
+    "release": "electron-builder --win nsis --publish never",
+    "release:portable": "node scripts/build-portable.cjs"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.autotreading.llmtrader",
+    "productName": "LLM Trader",
+    "asar": true,
+    "files": ["src/main/**/*", "src/renderer/**/*", "package.json"],
+    "directories": { "output": "release" },
+    "artifactName": "LLM-Trader-${version}.${ext}",
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LLM Trader"
+    }
+  }
+}
