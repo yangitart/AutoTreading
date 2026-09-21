@@ -16,6 +16,9 @@ Estados: [x] terminado y comprobado · [~] prototipo parcial · [ ] pendiente.
 - [x] Terminal con equity, saldo libre/reservado, drawdown, curva, P&L diario, coste API, reglas de lote, sizing, cancelación y reducción.
 - [x] Métricas diarias con continuidad entre días, profit factor neto y ratios N/D sin muestra suficiente.
 - [x] Salida LLM limitada en tokens, coste acumulado por sesión y divisa API explícita.
+- [x] Revisión visual de terminal: navegación SVG, jerarquía numérica, curvas legibles, watchlist con precios observados y ticket con desglose de costes.
+- [x] Prueba completa del LLM con transporte simulado: preflight, request HTTP, Structured Output, consenso, riesgo, fill y ledger; casos HOLD, 401, JSON inválido y presupuesto agotado.
+- [x] Modelo predeterminado, Chat Completions, reasoning effort y tarifas de Luna contrastados con documentación oficial para preparar la prueba con API key.
 - [ ] Validar una corrida Auto-Paper con el proveedor/modelo y API key del operador; no se hicieron llamadas facturables en esta revisión.
 - [ ] Evaluación prospectiva prolongada con estrategia congelada, benchmark y tolerancia de riesgo definidos por experimento.
 

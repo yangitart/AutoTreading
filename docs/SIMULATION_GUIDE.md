@@ -13,6 +13,10 @@ La cuenta inicial contiene 100 USDT virtuales. Los pares BTCUSDT, ETHUSDT y SOLU
 
 Configura endpoint, modelo disponible en tu proveedor y su API key. Las tarifas introducidas son estimaciones configurables: compruébalas con tu proveedor. Iniciar agentes abre la revisión de parámetros y ejecuta el preflight. El flujo se detiene si faltan clave, presupuesto, mercado o requisitos contables.
 
+Para la primera prueba: endpoint `https://api.openai.com/v1`, modelo `gpt-5.6-luna`, un solo símbolo `BTCUSDT` y primero **Analizar mercado**. Esta acción consulta al LLM pero no envía una orden automáticamente. Revisa la respuesta y después activa **Iniciar agentes** si deseas Auto-Paper. Guarda la clave únicamente en Configuración, no en archivos del proyecto ni en conversaciones.
+
+Compatibilidad y precios base de Luna contrastados con [OpenAI Docs](https://developers.openai.com/api/docs/models/gpt-5.6-luna): Chat Completions y razonamiento `low`; entrada 0.20 USD y salida 1.20 USD por millón de tokens. La tarifa configurada es por 1000 tokens (0.0002 / 0.0012). El [límite `max_completion_tokens`](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) incluye salida visible y razonamiento; una respuesta truncada se rechaza. El acceso efectivo depende de la cuenta del proveedor.
+
 Una pausa invalida respuestas pendientes: un resultado tardío no puede abrir una posición. El análisis usa indicadores calculados localmente y 60 velas de contexto; la salida tiene un máximo de 1600 tokens. Se conservan límites de llamadas diarios, coste estimado y pausa por errores. El presupuesto monetario es un control estimado al iniciar cada llamada; no es un límite de facturación impuesto al proveedor.
 
 El coste API se acumula por sesión y se muestra en USD. No se resta de USDT como si ambas monedas fueran idénticas. Los controles de ejecución son independientes del LLM.
