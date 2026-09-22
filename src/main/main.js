@@ -26,6 +26,7 @@ const { normalizeDepthSnapshot, applyDepthDiff, depthFreshness, availableNotiona
 const { monteCarloStress: runMonteCarloStress } = require('./monteCarlo');
 const { legacyCorrection, accountingIssues } = require('./paperAccounting');
 const { freshQuote } = require('./quoteQuality');
+const { registerBrokerWorkspace } = require('./brokerWorkspace');
 
 if (app.requestSingleInstanceLock && !app.requestSingleInstanceLock()) { app.quit(); process.exit(0); }
 const DATA_DIR = app.getPath('userData');
@@ -53,6 +54,7 @@ let automationStartApproved = false;
 let automationEpoch = 0;
 let automationStarting = false;
 let brokerSyncTimer = null;
+let brokerWorkspace = null;
 let brokerSnapshot = { status: 'not-configured', lastSyncAt: null, error: null, account: null, openOrders: [], orders: [], discrepancies: [], recovery: { activeCount: 0, attempted: 0, recovered: 0, unresolved: 0, unresolvedKeys: [] }, sandboxArmedUntil: null, stream: 'disconnected', ...readJson(LIVE_STATE_FILE, {}), stream: 'disconnected' };
 let paperBroker = null;
 const paperMutationQueue = new SerializedMutationQueue();
@@ -1197,7 +1199,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('app:snapshot', () => { const current = state(); return { settings: settings(), state: current, integrity: verifyPaperIntegrity(current), sessions: readJson(SESSIONS_FILE, []), broker: brokerSnapshot, hasApiKey: Boolean(apiKey()) }; });
+  brokerWorkspace = registerBrokerWorkspace({ ipcMain, directory: DATA_DIR, io: fs, readJson, writeJson, protect, unprotect, fetchImpl: (...args) => fetch(...args), onUpdate: broker => mainWindow?.webContents.send('broker:update', broker) });
+  ipcMain.handle('app:snapshot', () => { const current = state(); return { settings: settings(), state: current, integrity: verifyPaperIntegrity(current), sessions: readJson(SESSIONS_FILE, []), broker: brokerWorkspace.snapshot(), hasApiKey: Boolean(apiKey()) }; });
   ipcMain.handle('settings:save', (_event, value) => { const current = settings(), numeric = (key, fallback) => numericSetting(value[key], fallback); writeJson(SETTINGS_FILE, { ...current, mode: 'paper', accountCurrency: applyAccountCurrency(value.accountCurrency, current.accountCurrency), endpoint: String(value.endpoint || '').trim(), model: String(value.model || '').trim(), initialCash: numeric('initialCash', current.initialCash) > 0 ? numeric('initialCash', current.initialCash) : current.initialCash, feeRate: Math.max(0, numeric('feeRate', current.feeRate)), slippageBps: Math.max(0, numeric('slippageBps', current.slippageBps)), backtestSpreadBps: Math.min(1000, Math.max(0, numeric('backtestSpreadBps', current.backtestSpreadBps))), executionLatencyMs: Math.min(600000, Math.max(0, numeric('executionLatencyMs', current.executionLatencyMs))), limitOrderTtlMin: Math.min(10080, Math.max(1, numeric('limitOrderTtlMin', current.limitOrderTtlMin))), liquidityNotionalPerTick: Math.min(1000000, Math.max(0, numeric('liquidityNotionalPerTick', current.liquidityNotionalPerTick))), intrabarPolicy: ['conservative', 'take-first'].includes(value.intrabarPolicy) ? value.intrabarPolicy : current.intrabarPolicy, maxOrderPct: Math.min(100, Math.max(1, numeric('maxOrderPct', current.maxOrderPct))), maxDrawdownPct: Math.min(100, Math.max(1, numeric('maxDrawdownPct', current.maxDrawdownPct))), maxPortfolioRiskPct: Math.min(100, Math.max(0.1, numeric('maxPortfolioRiskPct', current.maxPortfolioRiskPct))), automationEnabled: Boolean(value.automationEnabled), automationIntervalMin: Math.max(5, numeric('automationIntervalMin', current.automationIntervalMin)), automationTimeframe: ['15m', '1h', '4h', '1d'].includes(value.automationTimeframe) ? value.automationTimeframe : current.automationTimeframe, automationSymbols: String(value.automationSymbols || 'BTCUSDT').split(',').map(item => item.trim().toUpperCase()).filter(item => /^[A-Z0-9]{5,15}$/.test(item)).slice(0, 10), minConfidence: Math.min(100, Math.max(0, numeric('minConfidence', current.minConfidence))), riskPerTradePct: Math.min(5, Math.max(0.1, numeric('riskPerTradePct', current.riskPerTradePct))), llmDailyCallBudget: Math.min(1000, Math.max(1, numeric('llmDailyCallBudget', current.llmDailyCallBudget))), llmDailyBudgetUsd: Math.min(10000, Math.max(0, numeric('llmDailyBudgetUsd', current.llmDailyBudgetUsd))), llmInputCostPer1kUsd: Math.min(1000, Math.max(0, numeric('llmInputCostPer1kUsd', current.llmInputCostPer1kUsd))), llmOutputCostPer1kUsd: Math.min(1000, Math.max(0, numeric('llmOutputCostPer1kUsd', current.llmOutputCostPer1kUsd))), llmFailurePauseThreshold: Math.min(20, Math.max(1, numeric('llmFailurePauseThreshold', current.llmFailurePauseThreshold))) }); return settings(); });
   ipcMain.handle('settings:partialFill', (_event, value) => { const current = settings(); writeJson(SETTINGS_FILE, { ...current, partialFillPct: Math.min(100, Math.max(1, Number(value) || current.partialFillPct)) }); return settings(); });
   ipcMain.handle('settings:risk', (_event, value) => { const current = settings(); writeJson(SETTINGS_FILE, { ...current, maxExposurePct: Math.min(100, Math.max(1, Number(value.maxExposurePct) || current.maxExposurePct)), maxAssetExposurePct: Math.min(100, Math.max(1, Number(value.maxAssetExposurePct) || current.maxAssetExposurePct)), maxSpreadBps: Math.max(1, Number(value.maxSpreadBps) || current.maxSpreadBps), maxTradesPerDay: Math.max(1, Number(value.maxTradesPerDay) || current.maxTradesPerDay), maxDataAgeMs: Math.max(1000, Number(value.maxDataAgeMs) || current.maxDataAgeMs) }); return settings(); });
@@ -1226,15 +1229,6 @@ app.whenReady().then(() => {
   ipcMain.handle('research:experiments', () => listBacktestExperiments());
   ipcMain.handle('research:evaluate-agents', () => { const current = state(); return evaluateAnalyses(current.analyses || [], current.initialCash); });
   ipcMain.handle('research:report', () => { const current = state(); return buildResearchReport({ analyses: current.analyses || [], backtests: readJson(EXPERIMENTS_FILE, []), initialCash: current.initialCash }); });
-  ipcMain.handle('broker:saveCredentials', (_event, value) => saveBrokerCredentials(value || {}));
-  ipcMain.handle('broker:testConnection', () => testBrokerConnection());
-  ipcMain.handle('broker:preflight', () => brokerPreflight());
-  ipcMain.handle('broker:armSandbox', () => armSandbox());
-  ipcMain.handle('broker:reconcile', () => reconcileBroker());
-  ipcMain.handle('broker:placeSandboxOrder', (_event, order) => placeSandboxOrder(order || {}));
-  ipcMain.handle('broker:getSandboxOrder', (_event, order) => getSandboxOrder(order || {}));
-  ipcMain.handle('broker:cancelSandboxOrder', (_event, order) => cancelSandboxOrder(order || {}));
-  ipcMain.handle('broker:killSandbox', () => killSandbox());
   ipcMain.handle('llm:analyze', (_event, query) => analyzeMarket(query));
   ipcMain.handle('paper:execute', async (_event, order) => {
     if (!order || !/^[A-Z0-9]{5,15}$/.test(String(order.symbol).toUpperCase()) || !['BUY', 'SELL'].includes(order.side) || !Number.isFinite(Number(order.quantity)) || Number(order.quantity) <= 0) throw new Error('Orden inválida.');
@@ -1260,10 +1254,10 @@ app.whenReady().then(() => {
   createWindow();
   subscribeMarket(['BTCUSDT', ...state().positions.map(p => p.symbol), ...state().orders.filter(o => ['accepted', 'partial'].includes(o.status)).map(o => o.symbol)]);
   automationTimer = setInterval(() => runPaperAutomation().catch(() => {}), 60000);
-  brokerSyncTimer = setInterval(() => reconcileBroker().catch(() => {}), 30000);
-  startBrokerStream().catch(() => {});
+  brokerSyncTimer = setInterval(() => brokerWorkspace?.reconcile().catch(() => {}), 15000);
+  setTimeout(() => brokerWorkspace?.reconcile().catch(() => {}), 100);
   app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
 });
 
-app.on('before-quit', () => { appQuitting = true; if (automationTimer) clearInterval(automationTimer); if (brokerSyncTimer) clearInterval(brokerSyncTimer); stopBrokerStream(); for (const stream of marketStreams.values()) { stream.closed = true; stream.socket?.close(); if (stream.poller) clearInterval(stream.poller); } });
+app.on('before-quit', () => { appQuitting = true; if (automationTimer) clearInterval(automationTimer); if (brokerSyncTimer) clearInterval(brokerSyncTimer); brokerWorkspace?.shutdown(); stopBrokerStream(); for (const stream of marketStreams.values()) { stream.closed = true; stream.socket?.close(); if (stream.poller) clearInterval(stream.poller); } });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

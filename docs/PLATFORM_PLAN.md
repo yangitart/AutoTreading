@@ -20,7 +20,7 @@ Mercado real o histórico con dinero virtual, capital configurable y sesiones ai
 
 ### Real
 
-Visible pero bloqueado hasta completar simulación, evaluación y sandbox. Requiere LiveBroker separado, credenciales por cuenta, permisos mínimos, vista read-only, reconciliación, idempotencia, auditoría, límites pre-trade, kill switch y activación explícita.
+Visible y desarmado por defecto. El adaptador Binance Spot ofrece lectura, testnet/demo y envío manual mainnet tras sesión de 15 minutos, preflight, permisos mínimos, IP restringida, presupuesto por orden/día/cartera, frase de armamento y confirmación individual. Órdenes no conocidas permanecen bloqueadas hasta reconciliar. La ejecución real exige que el operador complete primero una prueba testnet/demo y valide la cuenta propia. No hay órdenes reales desde LLM/Auto-Paper, retiros, apalancamiento ni guardianía 24/7.
 
 ### Investigación
 

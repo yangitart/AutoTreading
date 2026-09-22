@@ -9,17 +9,17 @@ class LiveBroker {
 
   getAccount() { return this.client.getAccount(); }
   getOpenOrders(symbol) { return this.client.getOpenOrders(symbol); }
-  createListenKey() { return this.client.createListenKey(); }
-  keepAliveListenKey(listenKey) { return this.client.keepAliveListenKey(listenKey); }
   getOrder(order) { return this.client.getOrder(order); }
+  getTrades(order) { return this.client.getTrades(order); }
+  getPermissions() { return this.client.getPermissions(); }
+  getInstrument(symbol) { return this.client.getInstrument(symbol); }
+  getQuote(symbol) { return this.client.getQuote(symbol); }
 
   placeOrder(order) {
-    if (!['testnet', 'demo'].includes(this.environment)) throw new Error('Las órdenes live permanecen bloqueadas fuera de sandbox/testnet.');
     return this.client.placeOrder(order);
   }
 
   cancelOrder(order) {
-    if (!['testnet', 'demo'].includes(this.environment)) throw new Error('Las cancelaciones live permanecen bloqueadas fuera de sandbox/testnet.');
     return this.client.cancelOrder(order);
   }
 }

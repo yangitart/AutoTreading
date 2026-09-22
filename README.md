@@ -12,7 +12,7 @@ La simulación revisada incluye fallback REST, ledger reconciliado, controles de
 - API key guardada mediante `safeStorage` de Electron; nunca llega al renderer.
 - Confirmación humana antes de ejecutar una orden paper.
 - Estado local en la carpeta de datos de Electron, no en el repositorio.
-- Modo real desactivado intencionalmente.
+- Workspace Real separado, Spot Binance sandbox/demo y órdenes manuales mainnet bajo sesión, límites y confirmación por orden.
 - Feed de precios en tiempo real para actualizar el valor de las posiciones paper.
 - Order book REST con spread, liquidez e imbalance para enriquecer el análisis.
 - Auto-Paper opcional: analiza con intervalo y confianza mínima, calcula tamaño por riesgo y ejecuta solo dentro del broker simulado.
@@ -61,12 +61,12 @@ src/renderer/   Interfaz segura sin acceso directo a Node.js
 
 El producto usa dos brokers detrás del mismo límite: `PaperBroker` (simula fills, comisiones, slippage, latencia y liquidez) y `LiveBroker` (lectura y sandbox/testnet mediante Binance). El LLM no recibe claves ni llama al broker directamente: devuelve una intención estructurada y el motor de riesgo valida tamaño, saldo, drawdown, símbolo y permisos antes de cualquier orden.
 
-El modo real requerirá una activación separada, credenciales distintas para cada cuenta, permisos mínimos de API, confirmación inicial y un interruptor de emergencia. Nunca se reutilizarán las claves del LLM como claves del exchange o broker.
+La sesión real requiere credenciales separadas, permisos mínimos de API, IP restringida, limits, reconciliación, armamento temporal y confirmación explícita por orden. Solo incluye spot manual; el LLM nunca puede colocar órdenes reales. Consulta [la guía del workspace real](docs/LIVE_TRADING_GUIDE.md). La integración necesita una comprobación propia en la cuenta del operador.
 
 ## Próximas fases
 
 1. Adaptador de datos de mercado configurable.
 2. Backtesting reproducible con SMA/EMA/RSI, comparación cash y buy-and-hold, y separación train/validation/test.
 3. Motor de riesgo con límites por cuenta y por operación.
-4. Integración con broker/exchange en sandbox.
-5. Solo después, permisos explícitos y ejecución real.
+4. Evaluación manual en Spot Testnet/Demo antes de conectar mainnet.
+5. No se habilita ejecución real automática.

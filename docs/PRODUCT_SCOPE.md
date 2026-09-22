@@ -8,7 +8,7 @@ Construir una aplicación de escritorio Electron que permita investigar, compara
 
 **Simulación / Paper:** son nombres del mismo entorno. Capital configurable, inicialmente 100 unidades de moneda de cuenta. Datos reales, operaciones virtuales, límites, costes y diario de decisiones. Mostrar explícitamente la moneda: USDT no es USD; la conversión deberá ser explícita cuando exista. No necesita credenciales de trading para consultar mercado público.
 
-**Real:** visible como próximo, sin ejecución implementada. Más adelante permite elegir proveedor y cuenta, verificar permisos y activar una sesión. Historial, credenciales, saldos y órdenes totalmente separados del paper. Nunca cambiar de entorno con órdenes pendientes sin resolver su estado. Cambiar de pestaña no autoriza operaciones reales.
+**Real:** workspace separado con adaptador Binance Spot, testnet/demo y órdenes manuales mainnet detrás de sesión temporal, preflight, límites y confirmación por orden. Nunca cambia de cuenta/entorno mientras queden órdenes abiertas o respuestas inciertas. Cambiar de pestaña no arma la sesión. Validar primero la cuenta propia en demo/testnet; operación real automatizada queda fuera del producto.
 
 **Investigación:** backtesting y comparaciones de estrategias; no necesita ser un tercer modo de ejecución.
 
@@ -54,11 +54,11 @@ La V1 local solo trabaja con la aplicación y equipo activos. Suspensión, apaga
 
 **Prioridad 1:** evaluación prolongada de resultados netos, recuperación y disponibilidad. Las métricas, benchmark de sesión y backtests están implementados; no constituyen evidencia de rentabilidad por sí mismos.
 
-**Prioridad 2:** adaptador sandbox, reconciliación y recuperación. Después, habilitación real.
+**Prioridad 2:** terminar prueba end-to-end con una cuenta Binance Sandbox/Demo del operador, incluyendo permissions, partial/fill/cancel/timeout y reinicio. La UI y el adaptador ya exponen esta ruta. Mainnet manual tiene compuertas de permisos, límites, frase y reconciliación; no declarar operativo hasta validar la cuenta y jurisdicción del operador.
 
 **Fuera de la primera versión:** apalancamiento, futuros/opciones, HFT, autoaprendizaje que modifica estrategias en vivo y múltiples agentes sin una mejora demostrada frente a un modelo sencillo.
 
-Existen adaptadores `PaperBroker` y `LiveBroker`. El motor paper todavía delega gran parte de su implementación en `main.js`; los módulos auxiliares y el flujo integrado tienen regresiones. Live permanece bloqueado fuera de sandbox/testnet.
+Existen adaptadores `PaperBroker` y `LiveBroker`. El motor paper aún mantiene su implementación en `main.js`. El gateway Live es independiente y serializa cambios de cuenta, credenciales y órdenes por scope.
 
 ## Pruebas de aceptación
 

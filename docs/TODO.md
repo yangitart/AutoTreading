@@ -2,7 +2,24 @@
 
 Esta es la lista operativa del proyecto. El alcance completo está en PLATFORM_PLAN.md. AGENTS.md exige actualizarla cuando una tarea queda implementada y verificada. La prioridad actual es hacer fiable la simulación; las tareas de ampliación de mercado, noticias y live quedan en espera.
 
+Real status: scope-separated Binance connection, signed REST client, time sync, encrypted account keys, durable idempotent commands, reconciliation and session controls implemented for review. Live sends only after risk gate + per-order acknowledgement. Not verified against an operator's Binance account; exercise testnet/demo before any mainnet setup. No unattended/LLM/live automation.
+
 Estados: [x] terminado y comprobado · [~] prototipo parcial · [ ] pendiente.
+
+## Real · preparación segura (2026-09-22)
+
+- [x] API Binance signed REST con rutas distintas para mainnet, Spot Testnet y Spot Demo; sync de reloj, timeouts, cuota 429/418 y estado desconocido quedan explícitos.
+- [x] Credenciales cifradas por API key y entorno; contexto, órdenes, fills, auditoría y selección se guardan por scope.
+- [x] Balances, órdenes/fills, filtros de instrumento, permisos e IP pasan por reconciliación REST serializada.
+- [x] Preflight mainnet exige permisos de lectura/spot, retiros apagados, restricción de IP, balances valorables y órdenes externas resueltas.
+- [x] Sesión manual desarmada al iniciar/cerrar, vence a 15 min y exige límites, dos reconocimientos y frase por cuenta.
+- [x] Órdenes mainnet MARKET/LIMIT sólo manuales; cotización fresca, filtros/saldo/exposición/spread y confirmación explícita antes de cada envío.
+- [x] Intento idempotente guardado antes de enviar. Respuesta incierta se consulta por `clientOrderId`, desarma y no se reenvía a ciegas.
+- [x] Cancelación limitada a órdenes de esta app; kill switch no liquida activos; cambios de cuenta bloqueados mientras haya órdenes sin resolver.
+- [ ] Probar una matriz Spot Demo/Testnet con una cuenta del operador; aquí no se enviaron órdenes reales ni demo.
+- [ ] Comprobar mainnet después de revisar permisos, IP y requisitos locales de la cuenta.
+
+Guía de conexión: `LIVE_TRADING_GUIDE.md`. La sincronización se consulta por REST cada ~15 s; no hay dependencia de User Data Stream.
 
 ## Simulación utilizable — revisión 2026-09-20
 
